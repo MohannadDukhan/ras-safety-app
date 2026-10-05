@@ -39,3 +39,36 @@ Install dependencies:
 
 ```bash
 npm install
+
+Create an untracked .env.local file in the project root:
+
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+
+Start the development server:
+npm run dev
+
+Database
+Database migrations are stored in:
+supabase/migrations/
+
+To apply migrations to a linked Supabase project:
+npx supabase db push
+
+Authentication credentials are managed by Supabase Auth. Application roles and worker information are stored separately in the profiles table.
+Row Level Security ensures that framers can only access their own submissions while administrators can review all submissions.
+Photos are stored in a private Supabase Storage bucket and are accessed through authenticated, temporary signed URLs.
+Entity Relationship Diagram
+ 
+Project Assumptions
+- Accounts are provisioned administratively; there is no public registration.
+- A submitted safety form is treated as Submitted; no approval workflow was required.
+- Multiple submissions by the same worker for the same site and date are allowed.
+- Photo uploads and database writes are separate operations and are not atomic across PostgreSQL and Supabase Storage.
+- The application is designed for a small internal workforce; pagination would be added if submission volume grew significantly.
+Checks
+npm run build
+npm run lint
+npm run preview
+
+Additional Supabase setup information is available in [README.md](supabase/README.md).
