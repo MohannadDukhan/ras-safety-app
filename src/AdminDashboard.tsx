@@ -1,6 +1,7 @@
 import { useEffect, useState, type SubmitEvent } from 'react'
 import { supabase } from './supabase'
 import SubmissionDetails from './SubmissionDetails'
+import AdminSummary from './AdminSummary'
 
 type FilterOptions = {
   sites: { id: string; name: string }[]
@@ -110,6 +111,7 @@ function AdminDashboard() {
   return (
     <section className="admin-dashboard" aria-labelledby="dashboard-title">
       <h3 id="dashboard-title">Admin dashboard</h3>
+      <AdminSummary />
       <p>Date filters use the form date. Submission times are shown in your local time.</p>
 
       {optionError ? (
