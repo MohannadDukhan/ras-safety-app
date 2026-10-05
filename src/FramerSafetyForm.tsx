@@ -1,4 +1,4 @@
-import { useEffect, useState, type SubmitEvent } from 'react'
+import { useEffect, useRef, useState, type SubmitEvent } from 'react'
 import { supabase } from './supabase'
 
 type Site = {
@@ -22,6 +22,20 @@ const confirmations = [
   { name: 'hazards_identified', label: 'Site hazards have been identified and addressed' },
 ] as const
 
+const photoTypes = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
+const maxPhotoSize = 5 * 1024 * 1024
+
+function validatePhotos(files: File[]) {
+  if (files.length === 0) return 'Choose at least one photo.'
+  if (files.length > 10) return 'Choose no more than 10 photos in total.'
+  if (files.some((file) => !Object.hasOwn(photoTypes, file.type))) {
+    return 'Photos must be JPEG, PNG, or WebP images.'
+  }
+  if (files.some((file) => file.size > maxPhotoSize)) return 'Each photo must be 5 MB or smaller.'
+  if (files.some((file) => file.size === 0)) return 'Empty files cannot be uploaded. Choose another photo.'
+  return null
+}
+
 function FramerSafetyForm({ userId }: { userId: string }) {
   const [sites, setSites] = useState<Site[] | null>(null)
   const [siteError, setSiteError] = useState<string | null>(null)
@@ -37,6 +51,9 @@ function FramerSafetyForm({ userId }: { userId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [photos, setPhotos] = useState<File[]>([])
+  const [progressMessage, setProgressMessage] = useState('')
+  const photoInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -82,26 +99,56 @@ function FramerSafetyForm({ userId }: { userId: string }) {
       return
     }
 
+    const photoError = validatePhotos(photos)
+    if (photoError) {
+      setErrorMessage(photoError)
+      return
+    }
+
     setIsSubmitting(true)
+    setProgressMessage('Saving safety form...')
+    let failureMessage = 'Unable to save your safety form. Your answers and photos are kept. Please try again.'
 
     try {
-      const { error } = await supabase.from('submissions').insert({
-        user_id: userId,
-        site_id: siteId,
-        form_date: formDate,
-        ...checklist,
-        notes: notes.trim() || null,
-      })
+      const { data: submission, error: submissionError } = await supabase
+        .from('submissions')
+        .insert({
+          user_id: userId,
+          site_id: siteId,
+          form_date: formDate,
+          ...checklist,
+          notes: notes.trim() || null,
+        })
+        .select('id')
+        .single()
+      if (submissionError) throw submissionError
 
-      if (error) {
-        setErrorMessage('Unable to submit your safety form. Your answers have been kept. Please try again.')
-      } else {
-        setChecklist(emptyChecklist)
-        setNotes('')
-        setSubmitted(true)
+      const bucket = supabase.storage.from('submission-photos')
+      const photoRecords: { submission_id: string; storage_path: string }[] = []
+      failureMessage = 'Your safety form was saved, but photo uploads could not be completed. Some photos may already have uploaded. Your answers and photos are kept. Submitting again will create a new submission.'
+      for (const [index, file] of photos.entries()) {
+        setProgressMessage(`Uploading photo ${index + 1} of ${photos.length}...`)
+        const extension = photoTypes[file.type as keyof typeof photoTypes]
+        const path = `${userId}/${submission.id}/${crypto.randomUUID()}.${extension}`
+        const { error } = await bucket.upload(path, file, {
+          contentType: file.type,
+        })
+        if (error) throw error
+        photoRecords.push({ submission_id: submission.id, storage_path: path })
       }
+
+      setProgressMessage('Finishing submission...')
+      failureMessage = 'Your safety form and photos were saved, but the photo records could not be saved. Your answers and photos are kept. Submitting again will create a new submission.'
+      const { error } = await supabase.from('submission_photos').insert(photoRecords)
+      if (error) throw error
+
+      setChecklist(emptyChecklist)
+      setNotes('')
+      setPhotos([])
+      if (photoInput.current) photoInput.current.value = ''
+      setSubmitted(true)
     } catch {
-      setErrorMessage('Unable to submit your safety form. Your answers have been kept. Please try again.')
+      setErrorMessage(failureMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -123,7 +170,6 @@ function FramerSafetyForm({ userId }: { userId: string }) {
     <form className="safety-form" onSubmit={handleSubmit} aria-busy={isSubmitting}>
       {errorMessage && <p className="error-message" role="alert">{errorMessage}</p>}
       {submitted && <p className="success-message" role="status">Safety form submitted successfully.</p>}
-
       <fieldset className="safety-form-fields" disabled={isSubmitting}>
         <div className="form-field">
           <label htmlFor="site">Job site</label>
@@ -160,10 +206,42 @@ function FramerSafetyForm({ userId }: { userId: string }) {
           <textarea id="notes" name="notes" rows={4} value={notes} onChange={(event) => setNotes(event.target.value)} />
         </div>
 
-        <button className="app-button" type="submit">
-          {isSubmitting ? 'Submitting...' : 'Submit safety form'}
-        </button>
+        <div className="form-field">
+          <label htmlFor="photos">Photos (required)</label>
+          <p className="photo-help" id="photo-help">Choose 1–10 JPEG, PNG, or WebP photos. Maximum 5 MB per photo. Choose again to add more photos.</p>
+          <input
+            ref={photoInput}
+            id="photos"
+            name="photos"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            required={photos.length === 0}
+            aria-describedby="photo-help photo-count"
+            onChange={(event) => {
+              const selected = Array.from(event.target.files ?? [])
+              // Files stay in React state; reset the picker for the next selection.
+              event.currentTarget.value = ''
+              if (selected.length === 0) return
+
+              const combined = [...photos, ...selected]
+              const photoError = validatePhotos(combined)
+              setErrorMessage(photoError)
+              setSubmitted(false)
+              if (photoError) return
+
+              setPhotos(combined)
+            }}
+          />
+          <p className="photo-help" id="photo-count" role="status">
+            {photos.length} {photos.length === 1 ? 'photo' : 'photos'} selected
+          </p>
+        </div>
       </fieldset>
+
+      <button className="app-button safety-submit" type="submit" disabled={isSubmitting}>
+        {isSubmitting ? progressMessage : 'Submit safety form'}
+      </button>
     </form>
   )
 }

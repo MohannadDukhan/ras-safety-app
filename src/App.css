@@ -221,6 +221,19 @@
   margin: 0 0 1.25rem;
 }
 
+.photo-help {
+  margin: 0;
+}
+
+.safety-submit {
+  width: 100%;
+  margin-top: 1.25rem;
+}
+
+.form-field input[type='file'] {
+  overflow: hidden;
+}
+
 .success-message {
   padding: 0.75rem;
   border-left: 3px solid var(--ras-green);
