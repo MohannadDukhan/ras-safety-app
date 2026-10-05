@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import rasLogo from './assets/ras-logo.webp'
 import LoginForm from './LoginForm'
-import FramerSafetyForm from './FramerSafetyForm'
+import FramerHome from './FramerHome'
 import { supabase } from './supabase'
 import './App.css'
 
@@ -124,7 +124,7 @@ function App() {
                   {profile.role === 'admin' ? (
                     <p className="entry-description">Admin dashboard coming next</p>
                   ) : (
-                    <FramerSafetyForm key={userId} userId={userId} />
+                    <FramerHome key={userId} userId={userId} />
                   )}
                 </>
               ) : (

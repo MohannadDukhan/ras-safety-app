@@ -240,3 +240,97 @@
   color: var(--ras-green);
   background-color: rgb(4 83 57 / 6%);
 }
+
+.framer-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.framer-navigation .app-button {
+  flex: 1;
+}
+
+.framer-navigation .app-button[aria-pressed='false'] {
+  color: var(--ras-green);
+  background-color: var(--ras-white);
+}
+
+.framer-navigation .app-button[aria-pressed='false']:hover {
+  color: var(--ras-white);
+  background-color: var(--ras-charcoal);
+}
+
+.submission-history,
+.submission-details {
+  margin-top: 1.5rem;
+}
+
+.submission-list,
+.submission-checklist {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.submission-card {
+  padding: 1rem;
+  border: 1px solid rgb(42 40 41 / 20%);
+  border-radius: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.submission-card h4 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.submission-summary {
+  display: grid;
+  gap: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.submission-summary dt {
+  font-weight: 600;
+}
+
+.submission-summary dd {
+  margin: 0;
+}
+
+.submission-checklist li {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(42 40 41 / 20%);
+  border-radius: 0.25rem;
+}
+
+.submission-notes {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.submission-photos {
+  display: grid;
+  gap: 1rem;
+}
+
+.submission-photos figure {
+  margin: 0;
+}
+
+.submission-photos img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.25rem;
+}
+
+.submission-photos a:focus-visible {
+  outline: 3px solid var(--ras-green);
+  outline-offset: 3px;
+}
