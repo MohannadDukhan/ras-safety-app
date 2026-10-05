@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import rasLogo from './assets/ras-logo.webp'
 import LoginForm from './LoginForm'
+import FramerSafetyForm from './FramerSafetyForm'
 import { supabase } from './supabase'
 import './App.css'
 
@@ -120,11 +121,11 @@ function App() {
                 <>
                   <p className="role-label">{profile.role === 'admin' ? 'Admin' : 'Framer'}</p>
                   <h2>Welcome, {profile.full_name}</h2>
-                  <p className="entry-description">
-                    {profile.role === 'admin'
-                      ? 'Admin dashboard coming next'
-                      : 'Safety form coming next'}
-                  </p>
+                  {profile.role === 'admin' ? (
+                    <p className="entry-description">Admin dashboard coming next</p>
+                  ) : (
+                    <FramerSafetyForm key={userId} userId={userId} />
+                  )}
                 </>
               ) : (
                 <p role="status">Loading your profile...</p>

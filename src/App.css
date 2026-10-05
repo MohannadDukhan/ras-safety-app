@@ -109,7 +109,9 @@
   font-weight: 600;
 }
 
-.form-field input {
+.form-field input,
+.form-field select,
+.form-field textarea {
   width: 100%;
   min-width: 0;
   min-height: 3rem;
@@ -139,7 +141,10 @@
 }
 
 .app-button:focus-visible,
-.form-field input:focus-visible {
+.form-field input:focus-visible,
+.form-field select:focus-visible,
+.form-field textarea:focus-visible,
+.checkbox-field input:focus-visible {
   outline: 3px solid var(--ras-green);
   outline-offset: 3px;
 }
@@ -159,4 +164,66 @@
   border-left: 3px solid var(--ras-charcoal);
   background-color: rgb(42 40 41 / 6%);
   overflow-wrap: anywhere;
+}
+
+.safety-form {
+  margin-top: 1.5rem;
+}
+
+.safety-form-fields,
+.safety-checklist {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.safety-checklist {
+  gap: 0.5rem;
+}
+
+.safety-checklist legend {
+  padding: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.safety-checklist p {
+  margin: 0 0 0.5rem;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(42 40 41 / 20%);
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.checkbox-field input {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.125rem 0 0;
+  accent-color: var(--ras-green);
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.safety-form > .error-message,
+.success-message {
+  margin: 0 0 1.25rem;
+}
+
+.success-message {
+  padding: 0.75rem;
+  border-left: 3px solid var(--ras-green);
+  color: var(--ras-green);
+  background-color: rgb(4 83 57 / 6%);
 }
