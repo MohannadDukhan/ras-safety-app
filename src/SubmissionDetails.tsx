@@ -18,10 +18,11 @@ type Submission = {
 
 type Photo = { id: string; url: string | null }
 
-function SubmissionDetails({ submissionId, userId, onBack }: {
+function SubmissionDetails({ submissionId, userId, onBack, backLabel = 'Back to my submissions' }: {
   submissionId: string
-  userId: string
+  userId?: string
   onBack: () => void
+  backLabel?: string
 }) {
   const [submission, setSubmission] = useState<Submission | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -33,7 +34,7 @@ function SubmissionDetails({ submissionId, userId, onBack }: {
 
     async function loadSubmission() {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('submissions')
           .select(`
             id, form_date, created_at, ppe_worn, fall_protection,
@@ -42,7 +43,10 @@ function SubmissionDetails({ submissionId, userId, onBack }: {
             submission_photos(id, storage_path)
           `)
           .eq('id', submissionId)
-          .eq('user_id', userId)
+
+        // Framers also narrow the query to themselves. RLS authorizes every read.
+        if (userId) query = query.eq('user_id', userId)
+        const { data, error } = await query
           .maybeSingle()
           .overrideTypes<Submission | null, { merge: false }>()
 
@@ -89,7 +93,7 @@ function SubmissionDetails({ submissionId, userId, onBack }: {
 
   return (
     <section className="submission-details" aria-labelledby="details-title">
-      <button className="app-button" type="button" onClick={onBack}>Back to my submissions</button>
+      <button className="app-button" type="button" onClick={onBack}>{backLabel}</button>
       <h3 id="details-title">Submission details</h3>
       {errorMessage ? (
         <p className="error-message" role="alert">{errorMessage}</p>

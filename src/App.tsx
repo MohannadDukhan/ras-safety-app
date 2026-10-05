@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import rasLogo from './assets/ras-logo.webp'
 import LoginForm from './LoginForm'
 import FramerHome from './FramerHome'
+import AdminDashboard from './AdminDashboard'
 import { supabase } from './supabase'
 import './App.css'
 
@@ -105,7 +106,7 @@ function App() {
       </header>
 
       <main className="app-main">
-        <section className="entry-panel" aria-labelledby="app-title">
+        <section className={`entry-panel${profile?.role === 'admin' ? ' admin-entry-panel' : ''}`} aria-labelledby="app-title">
           <p className="entry-label">Safety on every site</p>
           <h1 id="app-title">RAS Site Safety</h1>
 
@@ -122,7 +123,7 @@ function App() {
                   <p className="role-label">{profile.role === 'admin' ? 'Admin' : 'Framer'}</p>
                   <h2>Welcome, {profile.full_name}</h2>
                   {profile.role === 'admin' ? (
-                    <p className="entry-description">Admin dashboard coming next</p>
+                    <AdminDashboard key={userId} />
                   ) : (
                     <FramerHome key={userId} userId={userId} />
                   )}

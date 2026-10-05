@@ -334,3 +334,109 @@
   outline: 3px solid var(--ras-green);
   outline-offset: 3px;
 }
+
+.admin-entry-panel {
+  max-width: 64rem;
+}
+
+.admin-entry-panel .submission-details {
+  max-width: 36rem;
+  margin-inline: auto;
+}
+
+.admin-filters {
+  margin-block: 1.5rem;
+}
+
+.admin-filters fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-filters legend {
+  margin-bottom: 0.75rem;
+  padding: 0;
+  font-weight: 600;
+}
+
+.admin-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 1rem;
+}
+
+.admin-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-submissions-table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow-wrap: anywhere;
+}
+
+.admin-submissions-table caption {
+  text-align: left;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.admin-submissions-table th,
+.admin-submissions-table td {
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgb(42 40 41 / 20%);
+}
+
+.admin-submissions-table th {
+  background-color: rgb(4 83 57 / 6%);
+}
+
+.table-cell-label {
+  display: none;
+}
+
+@media (max-width: 48rem) {
+  .admin-submissions-table,
+  .admin-submissions-table tbody {
+    display: block;
+  }
+
+  .admin-submissions-table caption {
+    display: block;
+  }
+
+  .admin-submissions-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .admin-submissions-table tbody tr {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid rgb(42 40 41 / 20%);
+    border-radius: 0.25rem;
+  }
+
+  .admin-submissions-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+
+  .table-cell-label {
+    display: block;
+    font-weight: 600;
+  }
+}
