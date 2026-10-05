@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
 
 type Submission = {
@@ -28,6 +28,11 @@ function SubmissionDetails({ submissionId, userId, onBack, backLabel = 'Back to 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [photos, setPhotos] = useState<Photo[] | null>(null)
   const [photoError, setPhotoError] = useState<string | null>(null)
+  const heading = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    heading.current?.focus()
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -94,7 +99,7 @@ function SubmissionDetails({ submissionId, userId, onBack, backLabel = 'Back to 
   return (
     <section className="submission-details" aria-labelledby="details-title">
       <button className="app-button" type="button" onClick={onBack}>{backLabel}</button>
-      <h3 id="details-title">Submission details</h3>
+      <h3 id="details-title" ref={heading} tabIndex={-1}>Submission details</h3>
       {errorMessage ? (
         <p className="error-message" role="alert">{errorMessage}</p>
       ) : submission === null ? (
@@ -144,7 +149,12 @@ function SubmissionDetails({ submissionId, userId, onBack, backLabel = 'Back to 
                 <figure key={photo.id}>
                   {photo.url ? (
                     <>
-                      <a href={photo.url} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={photo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Open safety photo ${index + 1} for ${submission.sites?.name ?? 'this site'} in a new tab`}
+                      >
                         <img
                           src={photo.url}
                           alt={`Safety photo ${index + 1} for ${submission.sites?.name ?? 'this site'}`}
@@ -152,7 +162,7 @@ function SubmissionDetails({ submissionId, userId, onBack, backLabel = 'Back to 
                           onError={() => setPhotos((current) => current?.map((item) => item.id === photo.id ? { ...item, url: null } : item) ?? null)}
                         />
                       </a>
-                      <figcaption>Photo {index + 1} · Open full size</figcaption>
+                      <figcaption>Photo {index + 1} · Open full size (new tab)</figcaption>
                     </>
                   ) : (
                     <p className="error-message" role="alert">Photo {index + 1} could not be loaded. Reopen this submission to try again.</p>

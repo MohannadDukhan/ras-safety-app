@@ -1,4 +1,4 @@
-import { useEffect, useState, type SubmitEvent } from 'react'
+import { useEffect, useRef, useState, type SubmitEvent } from 'react'
 import { supabase } from './supabase'
 import SubmissionDetails from './SubmissionDetails'
 import AdminSummary from './AdminSummary'
@@ -27,6 +27,11 @@ function AdminDashboard() {
   const [submissions, setSubmissions] = useState<SubmissionSummary[] | null>(null)
   const [queryError, setQueryError] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const heading = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    if (!selectedId) heading.current?.focus()
+  }, [selectedId])
 
   useEffect(() => {
     let cancelled = false
@@ -35,7 +40,7 @@ function AdminDashboard() {
       try {
         const [sites, workers] = await Promise.all([
           supabase.from('sites').select('id, name').order('name'),
-          supabase.from('profiles').select('id, full_name').order('full_name'),
+          supabase.from('profiles').select('id, full_name').eq('role', 'framer').order('full_name'),
         ])
         if (cancelled) return
         if (sites.error || workers.error) throw sites.error ?? workers.error
@@ -110,7 +115,7 @@ function AdminDashboard() {
 
   return (
     <section className="admin-dashboard" aria-labelledby="dashboard-title">
-      <h3 id="dashboard-title">Admin dashboard</h3>
+      <h3 id="dashboard-title" ref={heading} tabIndex={-1}>Admin dashboard</h3>
       <AdminSummary />
       <p>Date filters use the form date. Submission times are shown in your local time.</p>
 

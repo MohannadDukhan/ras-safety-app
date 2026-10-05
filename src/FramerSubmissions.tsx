@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
 import SubmissionDetails from './SubmissionDetails'
 
@@ -13,6 +13,11 @@ function FramerSubmissions({ userId }: { userId: string }) {
   const [submissions, setSubmissions] = useState<SubmissionSummary[] | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const heading = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    if (!selectedId) heading.current?.focus()
+  }, [selectedId])
 
   useEffect(() => {
     let cancelled = false
@@ -46,7 +51,7 @@ function FramerSubmissions({ userId }: { userId: string }) {
 
   return (
     <section className="submission-history" aria-labelledby="history-title">
-      <h3 id="history-title">My submissions</h3>
+      <h3 id="history-title" ref={heading} tabIndex={-1}>My submissions</h3>
       {errorMessage ? (
         <p className="error-message" role="alert">{errorMessage}</p>
       ) : submissions === null ? (

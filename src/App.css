@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-block: 3rem;
+  padding-block: clamp(1.5rem, 5vw, 3rem);
 }
 
 .entry-panel {
@@ -85,6 +85,16 @@
   color: var(--ras-white);
   border-radius: 0.25rem;
   font-weight: 600;
+}
+
+.entry-panel h3 {
+  margin-block: 1.5rem 1rem;
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+.submission-details h4 {
+  margin-block: 1.5rem 0.75rem;
 }
 
 .login-form {
@@ -144,7 +154,8 @@
 .form-field input:focus-visible,
 .form-field select:focus-visible,
 .form-field textarea:focus-visible,
-.checkbox-field input:focus-visible {
+.checkbox-field input:focus-visible,
+.entry-panel h3:focus-visible {
   outline: 3px solid var(--ras-green);
   outline-offset: 3px;
 }
@@ -323,6 +334,10 @@
   margin: 0;
 }
 
+.submission-photos figcaption {
+  margin-top: 0.5rem;
+}
+
 .submission-photos img {
   display: block;
   width: 100%;
@@ -346,6 +361,10 @@
 
 .admin-filters {
   margin-block: 1.5rem;
+}
+
+.admin-filters > .error-message {
+  margin-bottom: 1rem;
 }
 
 .admin-summary {
@@ -479,5 +498,19 @@
   .table-cell-label {
     display: block;
     font-weight: 600;
+  }
+}
+
+@media (max-width: 30rem) {
+  .framer-navigation,
+  .admin-filter-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .submission-card .app-button,
+  .submission-details > .app-button,
+  .admin-submissions-table .app-button {
+    width: 100%;
   }
 }

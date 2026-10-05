@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type SubmitEvent } from 'react'
+import { useEffect, useState, type SubmitEvent } from 'react'
 import { supabase } from './supabase'
 
 type Site = {
@@ -53,7 +53,6 @@ function FramerSafetyForm({ userId }: { userId: string }) {
   const [submitted, setSubmitted] = useState(false)
   const [photos, setPhotos] = useState<File[]>([])
   const [progressMessage, setProgressMessage] = useState('')
-  const photoInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -145,7 +144,6 @@ function FramerSafetyForm({ userId }: { userId: string }) {
       setChecklist(emptyChecklist)
       setNotes('')
       setPhotos([])
-      if (photoInput.current) photoInput.current.value = ''
       setSubmitted(true)
     } catch {
       setErrorMessage(failureMessage)
@@ -210,7 +208,6 @@ function FramerSafetyForm({ userId }: { userId: string }) {
           <label htmlFor="photos">Photos (required)</label>
           <p className="photo-help" id="photo-help">Choose 1–10 JPEG, PNG, or WebP photos. Maximum 5 MB per photo. Choose again to add more photos.</p>
           <input
-            ref={photoInput}
             id="photos"
             name="photos"
             type="file"
