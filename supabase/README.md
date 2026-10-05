@@ -32,9 +32,9 @@ blocked. Sites with submissions cannot be deleted. These restrictions preserve
 safety records. Deleting a submission deletes its photo metadata; it does not
 delete files from Supabase Storage.
 
-The migration does not enable or disable RLS or create policies. Project settings
-or event triggers may enable RLS independently. Foreign keys enforce relationships,
-not user authorization; access control remains a separate implementation step.
+The initial migration only defines the tables. The next migration,
+`20261004000001_enable_rls.sql`, explicitly enables RLS and defines the application
+access rules below.
 
 ## Apply to the existing Supabase project
 
@@ -65,3 +65,51 @@ Make future schema changes in new migration files.
 
 Official references: [database migrations](https://supabase.com/docs/guides/deployment/database-migrations)
 and [CLI commands](https://supabase.com/docs/reference/cli/supabase-db-push).
+
+## Row Level Security
+
+All six policies apply only to the `authenticated` database role:
+
+- `profiles_read_authenticated`: signed-in users may read all profiles.
+- `sites_read_authenticated`: signed-in users may read all sites.
+- `submissions_read_owner_or_admin`: users may read their own submissions;
+  users with an `admin` profile may read every submission.
+- `submissions_insert_own`: a new submission's `user_id` must equal the signed-in
+  user's ID, including when an admin creates a submission.
+- `submission_photos_read_visible_submission`: users may read photos when they
+  can read the parent submission. The parent submission's RLS provides the
+  owner/admin restriction.
+- `submission_photos_insert_own_submission`: users may attach photo records
+  only to their own submissions. Admins cannot attach records to another worker's
+  submission.
+
+`auth.uid()` supplies the UUID from the authenticated request, rather than trusting
+a worker ID supplied by the browser. The admin check reads the matching row in
+`profiles` and requires `role = 'admin'`. Profile reads use a simple `true` policy,
+so this lookup does not query submissions again or cause recursive RLS. Photo
+policies query submissions, whose read policy queries profiles: this dependency
+goes in one direction.
+
+The migration revokes table privileges from `PUBLIC`, `anon`, and `authenticated`,
+then grants authenticated users only SELECT on all four tables and INSERT on
+submissions/photos. There are no profile/site write policies and no UPDATE/DELETE
+policies. This also prevents users from promoting themselves to admin. All profile
+columns, including roles, are readable by signed-in users under the requested rule.
+Existing privileged administrative access, including `service_role`, is not granted
+to browser users or changed by this migration. This covers photo metadata only;
+Storage bucket access is a separate step.
+
+### Apply RLS with the already-linked CLI
+
+From the repository root:
+
+```powershell
+npx.cmd supabase db push --dry-run
+npx.cmd supabase db push
+```
+
+The dry run should list only `20261004000001_enable_rls.sql` if the initial schema
+has already been applied. After pushing, review the policies for all four tables
+in the Supabase Dashboard. There is no need to initialize or link the project again.
+
+Reference: [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
